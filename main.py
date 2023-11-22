@@ -8,19 +8,18 @@ from track import TrackWidget
 
 Builder.load_file("track.kv")
 
-NB_TRACKS = 4
-
 
 class MainWidget(RelativeLayout):
     tracks_layout = ObjectProperty()
 
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
-        self.SoundKitService = SoundKitService()
+        self.sound_kit_service = SoundKitService()
 
     def on_parent(self, widget, parent):
-        for i in range(0, NB_TRACKS):
-            self.tracks_layout.add_widget(TrackWidget())
+        for i in range(0, self.sound_kit_service.get_nb_tracks()):
+            sound = self.sound_kit_service.get_sound_at(i)
+            self.tracks_layout.add_widget(TrackWidget(sound))
 
 
 class MrBeatApp(App):
