@@ -42,6 +42,11 @@ class MainWidget(RelativeLayout):
         if self.play_indicator_widget is not None:
             self.play_indicator_widget.set_current_step_index(self.step_index)
 
+    def on_play_button_press(self):
+        self.mixer.audio_play()
+
+    def on_stop_button_press(self):
+        self.mixer.audio_stop()
 
 class MrBeatApp(App):
     pass
