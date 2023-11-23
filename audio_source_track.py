@@ -1,5 +1,4 @@
 from array import array
-
 from audiostream.sources.thread import ThreadSource
 
 
@@ -35,9 +34,17 @@ class AudioSourceTrack(ThreadSource):
                 self.step_nb_samples = n
                 self.buf = array("h", b"\x00\x00" * self.step_nb_samples)
 
-    def get_bytes(self, *args, **kwargs):
+    def no_steps_activated(self):
+        if len(self.steps) == 0:
+            return True
+        for i in range(len(self.steps)):
+            if self.steps[i] == 1:
+                return False
+        return True
+
+    def get_bytes_array(self):
         for i in range(0, self.step_nb_samples):
-            if len(self.steps) > 0:
+            if len(self.steps) > 0 and not self.no_steps_activated():
                 if self.steps[self.current_step_index] == 1 and i < self.nb_wav_samples:
                     # Jouer le son
                     self.buf[i] = self.wav_samples[i]
@@ -57,4 +64,7 @@ class AudioSourceTrack(ThreadSource):
         if self.current_step_index >= len(self.steps):
             self.current_step_index = 0
 
-        return self.buf.tobytes()
+        return self.buf
+
+    def get_bytes(self, *args, **kwargs):
+        return self.get_bytes_array().tobytes()

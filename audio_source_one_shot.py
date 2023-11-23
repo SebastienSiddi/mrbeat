@@ -1,5 +1,4 @@
 from array import array
-
 from audiostream.sources.thread import ThreadSource
 
 
