@@ -6,7 +6,7 @@ from audio_source_track import AudioSourceTrack
 class AudioSourceMixer(ThreadSource):
     buf = None
 
-    def __init__(self, output_stream, all_wav_samples, bpm, sample_rate, nb_steps, *args, **kwargs):
+    def __init__(self, output_stream, all_wav_samples, bpm, sample_rate, nb_steps, on_current_step_changed, *args, **kwargs):
         ThreadSource.__init__(self, output_stream, *args, **kwargs)
 
         self.tracks = []
@@ -19,6 +19,7 @@ class AudioSourceMixer(ThreadSource):
         self.current_sample_index = 0
         self.current_step_index = 0
         self.sample_rate = sample_rate
+        self.on_current_step_changed = on_current_step_changed
 
     def set_steps(self, index, steps):
         if index >= len(self.tracks):
@@ -47,6 +48,14 @@ class AudioSourceMixer(ThreadSource):
             self.buf[i] = 0
             for j in range(0, len(track_buffers)):
                 self.buf[i] += track_buffers[j][i]
+
+        if self.on_current_step_changed is not None:
+            # Décalage de 2 steps pour synchroniser l'affichage du step current
+            # et le son entendu (à cause des buffers audio)
+            step_index_for_display = self.current_step_index - 2
+            if step_index_for_display < 0:
+                step_index_for_display += self.nb_steps
+            self.on_current_step_changed(step_index_for_display)
 
         self.current_step_index += 1
         if self.current_step_index >= self.nb_steps:
