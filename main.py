@@ -11,21 +11,25 @@ Builder.load_file("track.kv")
 Builder.load_file("play_indicator.kv")
 
 TRACK_NB_STEPS = 16
+MIN_BPM = 80
+MAX_BPM = 160
+
 TRACKS_STEPS_LEFT_ALIGN = dp(100)
 
 
 class MainWidget(RelativeLayout):
     tracks_layout = ObjectProperty()
-    play_indicator_widget= ObjectProperty()
+    play_indicator_widget = ObjectProperty()
     TRACKS_STEPS_LEFT_ALIGN = NumericProperty(dp(100))
     step_index = 0
+    bpm = NumericProperty(120)
 
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
         self.sound_kit_service = SoundKitService()
         self.audio_engine = AudioEngine()
 
-        self.mixer = self.audio_engine.create_mixer(self.sound_kit_service.soundkit.get_all_samples(), 120, TRACK_NB_STEPS, self.on_mixer_current_step_changed)
+        self.mixer = self.audio_engine.create_mixer(self.sound_kit_service.soundkit.get_all_samples(), 120, TRACK_NB_STEPS, self.on_mixer_current_step_changed, MIN_BPM)
 
     def on_parent(self, widget, parent):
         self.play_indicator_widget.set_nb_steps(TRACK_NB_STEPS)
@@ -47,6 +51,17 @@ class MainWidget(RelativeLayout):
 
     def on_stop_button_press(self):
         self.mixer.audio_stop()
+
+    def on_bpm(self, widget, value):
+        if value < MIN_BPM:
+            self.bpm = MIN_BPM
+            return
+        if value > MAX_BPM:
+            self.bpm = MAX_BPM
+            return
+
+        self.mixer.set_bpm(self.bpm)
+
 
 class MrBeatApp(App):
     pass
